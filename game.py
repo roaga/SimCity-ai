@@ -52,22 +52,26 @@ def placeBuilding(buildingNum, row, col):
 
     #update maps
 
-    time += 1
-    collectTaxes()
     print("TODO")
 
 def destroyBuilding(row, col):
     #update maps
 
-    time += 1
-    collectTaxes()
     print("TODO")
 
 def wait():
-    time += 1
-    collectTaxes()
+    return
 
 def collectTaxes():
     # calculate and add to funds
 
+    print("TODO")
+
+def takeTurn(action):
+    # bot chooses between place building, destroy building, and wait
+
+    collectTaxes()
+    time += 1
+
+    print(building_map)
     print("TODO")
