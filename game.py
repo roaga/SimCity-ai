@@ -32,17 +32,17 @@ class Building(Enum):
     UTILITY_PLANT = 10
 
 buildings = [
-    {"name": "Road", "buildCost": 0, "population": 0, "happiness": 0, "fire": False, "police": False, "health": False, "school": False, "park": False},
-    {"name": "House", "buildCost": 0, "population": 0, "happiness": 0, "fire": False, "police": False, "health": False, "school": False, "park": False},
-    {"name": "Tower", "buildCost": 0, "population": 0, "happiness": 0, "fire": False, "police": False, "health": False, "school": False, "park": False},
-    {"name": "Skyscraper", "buildCost": 0, "population": 0, "happiness": 0, "fire": False, "police": False, "health": False, "school": False, "park": False},
-    {"name": "Fire Station", "buildCost": 0, "population": 0, "happiness": 0, "fire": False, "police": False, "health": False, "school": False, "park": False},
-    {"name": "Police Station", "buildCost": 0, "population": 0, "happiness": 0, "fire": False, "police": False, "health": False, "school": False, "park": False},
-    {"name": "Hospital", "buildCost": 0, "population": 0, "happiness": 0, "fire": False, "police": False, "health": False, "school": False, "park": False},
-    {"name": "School", "buildCost": 0, "population": 0, "happiness": 0, "fire": False, "police": False, "health": False, "school": False, "park": False},
-    {"name": "Park", "buildCost": 0, "population": 0, "happiness": 0, "fire": False, "police": False, "health": False, "school": False, "park": False},
-    {"name": "Leisure", "buildCost": 0, "population": 0, "happiness": 0, "fire": False, "police": False, "health": False, "school": False, "park": False},
-    {"name": "Utility Plant", "buildCost": 0, "population": 0, "happiness": 0, "fire": False, "police": False, "health": False, "school": False, "park": False}
+    {"name": "Road", "buildCost": 0, "population": 0, "range": 0},
+    {"name": "House", "buildCost": 1000, "population": 50, "range": 0},
+    {"name": "Tower", "buildCost": 10000, "population": 500, "range": 0},
+    {"name": "Skyscraper", "buildCost": 20000, "population": 5000, "range": 0},
+    {"name": "Fire Station", "buildCost": 15000, "population": 0, "range": 12},
+    {"name": "Police Station", "buildCost": 15000, "population": 0, "range": 10},
+    {"name": "Hospital", "buildCost": 15000, "population": 0, "range": 10},
+    {"name": "School", "buildCost": 15000, "population": 0, "range": 8},
+    {"name": "Park", "buildCost": 15000, "population": 0, "range": 4},
+    {"name": "Leisure", "buildCost": 15000, "population": 0, "range": 5},
+    {"name": "Utility Plant", "buildCost": 5000, "population": 0, "range": 0}
 ]
 
 def placeBuilding(buildingNum, row, col):
