@@ -5,14 +5,14 @@ from enum import Enum
 time = 0 # game time
 
 funds = 1000 + 20000 # player's cash + set larger for testing
-happiness = 100 # happiness of city
+happiness = 10000 # happiness of city, in units
+happiness_percent = happiness // 100 # happiness of city, as a percent, reported to model
 population = 0 # population of city
 utilities = 0 # total water/energy provided for the city
 
 map_dimensions = (10, 10) # should be 256x256 for proper game
 building_map = np.zeros(map_dimensions)
 population_map = np.zeros(map_dimensions)
-happiness_map = np.zeros(map_dimensions)
 fire_map = np.zeros(map_dimensions)
 police_map = np.zeros(map_dimensions)
 health_map = np.zeros(map_dimensions)
@@ -184,10 +184,26 @@ def destroyBuilding(row, col):
 def wait():
     return
 
-def collectTaxes():
-    # calculate and add to funds
+def computeHappiness():
+    for i in range(0, 10): # iterate through map
+        for j in range(0, 10):
+            if(population_map(i, j) > 0): # check if building is a housing building
+                flag = True # flag to check if services have been met
+                if(fire_map(i, j) != 1 or police_map(i, j) != 1 or health_map(i, j) != 1): # check if a core service is there
+                    happiness = happiness - 300
+                    flag = False
+                if(school_map(i, j) != 1 or park_map(i, j) != 1 or leisure_map(i, j) != 1): # check if a leisure service is there
+                    happiness = happiness - 15
+                    flag = False
+                if(flag): # if both services are there at a house, increase happiness
+                    happiness = happiness + 75
+    happiness_percent = happiness // 100 # calculate happiness percentage value
 
-    print("TODO")
+def collectTaxes():
+    computeHappiness()
+    tax = population * (happiness / 10000)
+    return tax
+    # calculate and add to funds
 
 def takeTurn(action):
     # bot chooses between place building, destroy building, and wait
@@ -195,5 +211,7 @@ def takeTurn(action):
     collectTaxes()
     time += 1
 
+    funds = funds + collectTaxes() # update funds
+    print("Happiness: " + happiness_percent + "%") # display happiness
     print(building_map)
     print("TODO")
