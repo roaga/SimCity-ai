@@ -1,6 +1,7 @@
 import math
 import numpy as np
 from enum import Enum
+from random import randint
 
 time = 0 # game time
 
@@ -177,7 +178,7 @@ printGrid(building_map);
 '''
   
 def destroyBuilding(row, col):
-    #update maps
+    return False
 
     print("TODO")
 
@@ -191,9 +192,29 @@ def collectTaxes():
 
 def takeTurn(action):
     # bot chooses between place building, destroy building, and wait
-
     collectTaxes()
     time += 1
 
-    print(building_map)
+    choice = randint(0, 2)
+    if (choice == 0):
+        wait()
+    elif (choice == 1):
+        b = False
+        row = randint(0, map_dimensions[0])
+        col = randint(0, map_dimensions[1])
+        while not b:
+            row = randint(0, map_dimensions[0])
+            col = randint(0, map_dimensions[1])
+            b = destroyBuilding(row, col)
+    else:
+        b = False
+        row = randint(0, map_dimensions[0])
+        col = randint(0, map_dimensions[1])
+        choice = randint(1, 10)
+        while not b:
+            row = randint(0, map_dimensions[0])
+            col = randint(0, map_dimensions[1])
+            b = destroyBuilding(choice, row, col)
+    printGrid(building_map)
+    print(happiness) #happiness is equal to the reward function
     print("TODO")
