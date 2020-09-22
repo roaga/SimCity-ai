@@ -12,7 +12,6 @@ utilities = 0 # total water/energy provided for the city
 map_dimensions = (10, 10) # should be 256x256 for proper game
 building_map = np.zeros(map_dimensions)
 population_map = np.zeros(map_dimensions)
-happiness_map = np.zeros(map_dimensions)
 fire_map = np.zeros(map_dimensions)
 police_map = np.zeros(map_dimensions)
 health_map = np.zeros(map_dimensions)
@@ -30,7 +29,8 @@ class Building(Enum):
     HOSPITAL = 7
     SCHOOL = 8
     PARK = 9
-    UTILITY_PLANT = 10
+    LEISURE = 10
+    UTILITY_PLANT = 11
 
 buildings = [
     {"name": "Road", "buildCost": 0, "population": 0, "range": 0},
@@ -113,9 +113,10 @@ def placeBuilding(buildingNum, row, col):
     buildingRadiusToCheck = 0;
     buildingRadiusFree = False;
     roadRadiusToCheck = 1;
-    roadRadiusFree = False;
-    costPermitting = False;
-    buildingCost = buildings[buildingNum - 1]["buildCost"];
+    roadRadiusFree = False
+    costPermitting = False
+
+    buildingCost = buildings[buildingNum - 1]["buildCost"]
 
     #check if building inside grid
     if (insideGrid):
@@ -139,13 +140,36 @@ def placeBuilding(buildingNum, row, col):
         print("Building must have nearby roads.");
         return False;
     
-    #update maps
     if (costPermitting):
         print("Placing building...");
 		
+        pop = buildings[buildingNum - 1]["population"] #TODO: calculate population based on services
+        buildingRange = buildings[buildingNum - 1]["range"]
 	    # Place the building
         funds -= buildingCost;
+        #update maps and variables
         building_map[row][col] = buildingNum;
+        population += pop
+        population_map[row][col] = pop
+
+        # Specific service update
+        if buildingNum == 1 or 2 or 3 or 4:
+            # Do nothing; delete this later
+        elif buildingNum == 5:
+            updateRange(fire_map, row, col, buildingRange)
+        elif buildingNum == 6:
+            updateRange(police_map, row, col, buildingRange)
+        elif buildingNum == 7:
+            updateRange(health_map, row, col, buildingRange)
+        elif buildingNum == 8:
+            updateRange(school_map, row, col, buildingRange)
+        elif buildingNum == 9:
+            updateRange(park_map, row, col, buildingRange)
+        elif buildingNum == 10:
+            updateRange(leisure_map, row, col, buildingRange)
+        elif buildingNum == 11:
+            utilities += 10
+
         return True;
     else:
         print("Invalid funds.");
@@ -153,28 +177,6 @@ def placeBuilding(buildingNum, row, col):
 		
 
     print("TODO")
-    
-def printGrid(grid):
-    # Row and column got swapped at some point, don't know when
-    print("===");
-    for c in range(0, len(grid)):
-        rowOutput = "";
-        for r in range(0, len(grid)):
-            rowOutput += str(grid[r][c]) + " ";
-        print(rowOutput);
-    print("===");
-    
-# TEST INPUT
-'''
-placeBuilding(2, 4, 4);
-printGrid(building_map);
-placeBuilding(1, 4, 0); 
-printGrid(building_map);
-placeBuilding(2, 4, 1);
-printGrid(building_map);
-placeBuilding(-1, -1, 1);
-printGrid(building_map);
-'''
   
 def destroyBuilding(row, col):
     #update maps
