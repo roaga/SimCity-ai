@@ -1,3 +1,4 @@
+import math
 import numpy as np
 from enum import Enum
 
@@ -45,15 +46,43 @@ buildings = [
     {"name": "Utility Plant", "buildCost": 5000, "population": 0, "range": 0}
 ]
 
+# Typical distance calculation function
+def calculateDistance(x1, x2, y1, y2):
+	return math.sqrt(math.pow(x2 - x1, 2) + math.pow(y2 - y1, 2));
+
+# Checks if a radius is free of buildings / map edges around an area w/ particular center and radius
+def checkIfRadiusFree(building_map, centerX, centerY, radius):
+	# TODO: Maybe find a better way of iterating over a circular area?
+	if (centerX - radius < 0 or centerX + radius > len(building_map)):
+		return False;
+	if (centerY - radius < 0 or centerY + radius > len(building_map[0])): # Assumes non-jagged array with at least one column
+		return False;
+	for r in range(centerX - radius, centerX + radius):
+		for c in range(centerY - radius, centerY + radius):
+			if (calculateDistance(r, c, centerX, centerY) <= radius):
+				# Grid coordinate is within radius
+				if (building_map[r, c] != 0):
+					return False;
+	return True;
+
 def placeBuilding(buildingNum, row, col):
     #check if coords are valid (road access, not occupied)
+    radiusToCheck = 2; # Not sure what this should be
+    radiusFree = checkIfRadiusFree(building_map, row, col, radiusToCheck);
 
     #check for build cost and purchase
+    if (radiusFree):
+        print("Placing building...");
+		
+		# Place the building
+    else:
+        print("Building cannot be in range of another building.");
+        return False;
 
     #update maps
 
     print("TODO")
-
+   
 def destroyBuilding(row, col):
     #update maps
 
