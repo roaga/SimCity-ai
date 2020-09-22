@@ -217,4 +217,3 @@ def takeTurn(action):
             b = placeBuilding(choice, row, col) #keep randomly generating a coordinate to place a building until possible
     printGrid(building_map)
     print(happiness) #happiness is equal to the reward function
-    print("TODO")
