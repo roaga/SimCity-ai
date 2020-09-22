@@ -9,6 +9,8 @@ happiness = 100 # happiness of city
 population = 0 # population of city
 utilities = 0 # total water/energy provided for the city
 
+roadRadiusToCheck = 1;
+
 map_dimensions = (10, 10) # should be 256x256 for proper game
 building_map = np.zeros(map_dimensions)
 population_map = np.zeros(map_dimensions)
@@ -80,6 +82,28 @@ def checkIfRadiusFree(building_map, centerX, centerY, radius):
             return False;                    
     
     return True;
+
+
+def updateRange(building_map, centerX, centerY, radius):
+    # TODO: I'm copy/pasting this basic function a lot, but idk how to make it better
+
+    if (not checkIfOnGrid(centerX, centerY, building_map)):
+        return False;
+    
+    if (radius > 0):
+        for r in range(centerX - radius, centerX + radius + 1):
+            for c in range(centerY - radius, centerY + radius + 1):
+                if (checkIfOnGrid(centerX, centerY, building_map) and calculateDistance(r, c, centerX, centerY) <= radius):
+                    # Grid coordinate is within radius
+                    # print("Distance of " + str(calculateDistance(r, c, centerX, centerY)) + " at (" + str(r) + "," + str(c) + ")");
+                    if (building_map[r, c] != 0):
+                        # TODO: UPDATE BUILDING HERE
+                        print("TODO");
+    else:
+        if (building_map[centerX, centerY] != 0):
+            return False;                    
+    
+    return True;
     
 def checkIfNearbyRoads(building_map, centerX, centerY, radius):
     
@@ -99,10 +123,29 @@ def checkIfNearbyRoads(building_map, centerX, centerY, radius):
     
     return False;
 
+def destroyBuilding(row, col):
+    global building_map;
+
+    buildingNum = building_map[row][col];
+    buildingCost = buildings[buildingNum - 1]["buildCost"];
+
+    funds += buildingCost;
+    building_map[row][col] = 0; # 0 = nothing
+
 def placeBuilding(buildingNum, row, col):
+    global building_map;
+
+    buildingCost = buildings[buildingNum - 1]["buildCost"];
+
+    funds -= buildingCost;
+    building_map[row][col] = buildingNum;
+
+
+def placeBuildingIfPossible(buildingNum, row, col):
     #global variables
     global building_map;
     global funds;
+    global roadRadiusToCheck;
     
     #check if input is reasonable
     if (buildingNum == 0):
@@ -112,7 +155,6 @@ def placeBuilding(buildingNum, row, col):
     insideGrid = checkIfOnGrid(row, col, building_map);
     buildingRadiusToCheck = 0;
     buildingRadiusFree = False;
-    roadRadiusToCheck = 1;
     roadRadiusFree = False;
     costPermitting = False;
     buildingCost = buildings[buildingNum - 1]["buildCost"];
@@ -139,13 +181,12 @@ def placeBuilding(buildingNum, row, col):
         print("Building must have nearby roads.");
         return False;
     
-    #update maps
+    #check for sufficient funds
     if (costPermitting):
         print("Placing building...");
 		
 	    # Place the building
-        funds -= buildingCost;
-        building_map[row][col] = buildingNum;
+        addBuilding(buildingNum, row, col);
         return True;
     else:
         print("Invalid funds.");
@@ -176,10 +217,26 @@ placeBuilding(-1, -1, 1);
 printGrid(building_map);
 '''
   
-def destroyBuilding(row, col):
-    #update maps
+def destroyBuildingIfPossible(row, col):
+    global building_map;
+    global roadRadiusToCheck;
 
-    print("TODO")
+    if (not checkIfOnGrid(row, col, building_map)):
+        print("Building must be on grid!");
+        return False;
+
+    if (not building_map[row, col] != 0):
+        print("Selected location to destroy is not a building!");
+        return False;
+
+    # update surrounding buildings
+    if (building_map[row, col] == 1): # road!
+        updateRange(building_map, row, col, roadRadiusToCheck);
+
+        # destroy the building
+        destroyBuilding(row, col);
+
+    return True;
 
 def wait():
     return
