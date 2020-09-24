@@ -4,7 +4,6 @@ from enum import Enum
 from random import randint
 
 time = 0 # game time
-
 funds = 1000 + 20000 # player's cash + set larger for testing
 happiness = 10000 # happiness of city, in units
 happiness_percent = happiness // 100 # happiness of city, as a percent, reported to model
@@ -76,7 +75,6 @@ def checkIfRadiusFree(building_map, centerX, centerY, radius):
                     # print("Distance of " + str(calculateDistance(r, c, centerX, centerY)) + " at (" + str(r) + "," + str(c) + ")");
                     if (building_map[r, c] != 0):
                         return False;
-
     else:
         if (building_map[centerX, centerY] != 0):
             return False;                    
@@ -84,7 +82,6 @@ def checkIfRadiusFree(building_map, centerX, centerY, radius):
     return True;
     
 def checkIfNearbyRoads(building_map, centerX, centerY, radius):
-    
     if (not checkIfOnGrid(centerX, centerY, building_map)):
         return False;
     
@@ -93,9 +90,8 @@ def checkIfNearbyRoads(building_map, centerX, centerY, radius):
             for c in range(centerY - radius, centerY + radius + 1):
                 if (checkIfOnGrid(centerX, centerY, building_map) and calculateDistance(r, c, centerX, centerY) <= radius):
                     # Grid coordinate is within radius
-                    if (building_map[r][c] == 1):
+                    if (building_map[r, c] == 1):
                         return True;
-
     else:
         print("INVALID INPUT FOR CHECKIFNEARBYROADS()! RADIUS CANNOT BE ZERO FOR USEFUL OUTPUT!");                 
     
@@ -103,9 +99,21 @@ def checkIfNearbyRoads(building_map, centerX, centerY, radius):
 
 def placeBuilding(buildingNum, row, col):
     #global variables
-    global building_map;
-    global funds;
-    
+    global building_map
+    global population_map
+    global fire_map
+    global police_map 
+    global health_map
+    global school_map 
+    global park_map
+    global leisure_map
+    global funds
+    global time
+    global happiness
+    global happiness_percent 
+    global population
+    global utilities
+        
     #check if input is reasonable
     if (buildingNum == 0):
         print("INVALID INPUT FOR PLACEBUILDING()! BUILDINGNUM CANNOT BE ZERO FOR USEFUL OUTPUT!");   
@@ -150,9 +158,9 @@ def placeBuilding(buildingNum, row, col):
 	    # Place the building
         funds -= buildingCost;
         #update maps and variables
-        building_map[row][col] = buildingNum;
+        building_map[row, col] = buildingNum;
         population += pop
-        population_map[row][col] = pop
+        population_map[row, col] = pop
 
         # Specific service update
         # if buildingNum == 1 or 2 or 3 or 4:
@@ -189,14 +197,18 @@ def wait():
     return
 
 def computeHappiness():
+    #global variables
+    global happiness
+    global happiness_percent 
+
     for i in range(0, 10): # iterate through map
         for j in range(0, 10):
-            if(population_map(i, j) > 0): # check if building is a housing building
+            if(population_map[i, j] > 0): # check if building is a housing building
                 flag = True # flag to check if services have been met
-                if(fire_map(i, j) != 1 or police_map(i, j) != 1 or health_map(i, j) != 1): # check if a core service is there
+                if(fire_map[i, j] != 1 or police_map[i, j] != 1 or health_map[i, j] != 1): # check if a core service is there
                     happiness = happiness - 300
                     flag = False
-                if(school_map(i, j) != 1 or park_map(i, j) != 1 or leisure_map(i, j) != 1): # check if a leisure service is there
+                if(school_map[i, j] != 1 or park_map[i, j] != 1 or leisure_map[i, j] != 1): # check if a leisure service is there
                     happiness = happiness - 15
                     flag = False
                 if(flag): # if both services are there at a house, increase happiness
@@ -209,13 +221,17 @@ def collectTaxes():
     return tax
     # calculate and add to funds
 
-def takeTurn(action):
+def takeTurn():
+    #global variables
+    global time
+    global funds
+
     # bot chooses between place building, destroy building, and wait
     collectTaxes()
     time += 1
 
     funds = funds + collectTaxes() # update funds
-    print("Happiness: " + happiness_percent + "%") # display happiness
+    print("Happiness: " + str(happiness_percent) + "%") # display happiness
     print(building_map)
     
     choice = randint(0, 2) #1 of 3 choices: wait, destroy, or place
