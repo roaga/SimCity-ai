@@ -155,9 +155,9 @@ def placeBuilding(buildingNum, row, col):
         population_map[row][col] = pop
 
         # Specific service update
-        if buildingNum == 1 or 2 or 3 or 4:
+        # if buildingNum == 1 or 2 or 3 or 4:
             # Do nothing; delete this later
-        elif buildingNum == 5:
+        if buildingNum == 5:
             updateRange(fire_map, row, col, buildingRange)
         elif buildingNum == 6:
             updateRange(police_map, row, col, buildingRange)
