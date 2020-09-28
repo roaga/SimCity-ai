@@ -1,11 +1,12 @@
 import math
 import numpy as np
 from enum import Enum
+from random import randint
 
 time = 0 # game time
-
 funds = 1000 + 20000 # player's cash + set larger for testing
-happiness = 100 # happiness of city
+happiness = 10000 # happiness of city, in units
+happiness_percent = happiness // 100 # happiness of city, as a percent, reported to model
 population = 0 # population of city
 utilities = 0 # total water/energy provided for the city
 
@@ -14,7 +15,6 @@ roadRadiusToCheck = 1;
 map_dimensions = (10, 10) # should be 256x256 for proper game
 building_map = np.zeros(map_dimensions)
 population_map = np.zeros(map_dimensions)
-happiness_map = np.zeros(map_dimensions)
 fire_map = np.zeros(map_dimensions)
 police_map = np.zeros(map_dimensions)
 health_map = np.zeros(map_dimensions)
@@ -32,7 +32,8 @@ class Building(Enum):
     HOSPITAL = 7
     SCHOOL = 8
     PARK = 9
-    UTILITY_PLANT = 10
+    LEISURE = 10
+    UTILITY_PLANT = 11
 
 buildings = [
     {"name": "Road", "buildCost": 0, "population": 0, "range": 0},
@@ -76,13 +77,11 @@ def checkIfRadiusFree(building_map, centerX, centerY, radius):
                     # print("Distance of " + str(calculateDistance(r, c, centerX, centerY)) + " at (" + str(r) + "," + str(c) + ")");
                     if (building_map[r, c] != 0):
                         return False;
-
     else:
         if (building_map[centerX, centerY] != 0):
             return False;                    
     
     return True;
-
 
 def updateRange(building_map, centerX, centerY, radius):
     # TODO: I'm copy/pasting this basic function a lot, but idk how to make it better
@@ -106,7 +105,6 @@ def updateRange(building_map, centerX, centerY, radius):
     return True;
     
 def checkIfNearbyRoads(building_map, centerX, centerY, radius):
-    
     if (not checkIfOnGrid(centerX, centerY, building_map)):
         return False;
     
@@ -115,9 +113,8 @@ def checkIfNearbyRoads(building_map, centerX, centerY, radius):
             for c in range(centerY - radius, centerY + radius + 1):
                 if (checkIfOnGrid(centerX, centerY, building_map) and calculateDistance(r, c, centerX, centerY) <= radius):
                     # Grid coordinate is within radius
-                    if (building_map[r][c] == 1):
+                    if (building_map[r, c] == 1):
                         return True;
-
     else:
         print("INVALID INPUT FOR CHECKIFNEARBYROADS()! RADIUS CANNOT BE ZERO FOR USEFUL OUTPUT!");                 
     
@@ -125,28 +122,40 @@ def checkIfNearbyRoads(building_map, centerX, centerY, radius):
 
 def destroyBuilding(row, col):
     global building_map;
+    global funds;
 
     buildingNum = building_map[row][col];
     buildingCost = buildings[buildingNum - 1]["buildCost"];
 
     funds += buildingCost;
     building_map[row][col] = 0; # 0 = nothing
-
+    
 def placeBuilding(buildingNum, row, col):
     global building_map;
+    global funds;
 
     buildingCost = buildings[buildingNum - 1]["buildCost"];
 
     funds -= buildingCost;
     building_map[row][col] = buildingNum;
 
-
 def placeBuildingIfPossible(buildingNum, row, col):
     #global variables
-    global building_map;
-    global funds;
-    global roadRadiusToCheck;
-    
+    global building_map
+    global population_map
+    global fire_map
+    global police_map 
+    global health_map
+    global school_map 
+    global park_map
+    global leisure_map
+    global funds
+    global time
+    global happiness
+    global happiness_percent 
+    global population
+    global utilities
+        
     #check if input is reasonable
     if (buildingNum == 0):
         print("INVALID INPUT FOR PLACEBUILDING()! BUILDINGNUM CANNOT BE ZERO FOR USEFUL OUTPUT!");   
@@ -155,9 +164,11 @@ def placeBuildingIfPossible(buildingNum, row, col):
     insideGrid = checkIfOnGrid(row, col, building_map);
     buildingRadiusToCheck = 0;
     buildingRadiusFree = False;
-    roadRadiusFree = False;
-    costPermitting = False;
-    buildingCost = buildings[buildingNum - 1]["buildCost"];
+    roadRadiusToCheck = 1;
+    roadRadiusFree = False
+    costPermitting = False
+
+    buildingCost = buildings[buildingNum - 1]["buildCost"]
 
     #check if building inside grid
     if (insideGrid):
@@ -181,12 +192,36 @@ def placeBuildingIfPossible(buildingNum, row, col):
         print("Building must have nearby roads.");
         return False;
     
-    #check for sufficient funds
     if (costPermitting):
         print("Placing building...");
 		
+        pop = buildings[buildingNum - 1]["population"] #TODO: calculate population based on services
+        buildingRange = buildings[buildingNum - 1]["range"]
 	    # Place the building
-        addBuilding(buildingNum, row, col);
+        funds -= buildingCost;
+        #update maps and variables
+        building_map[row, col] = buildingNum;
+        population += pop
+        population_map[row, col] = pop
+
+        # Specific service update
+        # if buildingNum == 1 or 2 or 3 or 4:
+            # Do nothing; delete this later
+        if buildingNum == 5:
+            updateRange(fire_map, row, col, buildingRange)
+        elif buildingNum == 6:
+            updateRange(police_map, row, col, buildingRange)
+        elif buildingNum == 7:
+            updateRange(health_map, row, col, buildingRange)
+        elif buildingNum == 8:
+            updateRange(school_map, row, col, buildingRange)
+        elif buildingNum == 9:
+            updateRange(park_map, row, col, buildingRange)
+        elif buildingNum == 10:
+            updateRange(leisure_map, row, col, buildingRange)
+        elif buildingNum == 11:
+            utilities += 10
+
         return True;
     else:
         print("Invalid funds.");
@@ -194,28 +229,6 @@ def placeBuildingIfPossible(buildingNum, row, col):
 		
 
     print("TODO")
-    
-def printGrid(grid):
-    # Row and column got swapped at some point, don't know when
-    print("===");
-    for c in range(0, len(grid)):
-        rowOutput = "";
-        for r in range(0, len(grid)):
-            rowOutput += str(grid[r][c]) + " ";
-        print(rowOutput);
-    print("===");
-    
-# TEST INPUT
-'''
-placeBuilding(2, 4, 4);
-printGrid(building_map);
-placeBuilding(1, 4, 0); 
-printGrid(building_map);
-placeBuilding(2, 4, 1);
-printGrid(building_map);
-placeBuilding(-1, -1, 1);
-printGrid(building_map);
-'''
   
 def destroyBuildingIfPossible(row, col):
     global building_map;
@@ -233,24 +246,69 @@ def destroyBuildingIfPossible(row, col):
     if (building_map[row, col] == 1): # road!
         updateRange(building_map, row, col, roadRadiusToCheck);
 
-        # destroy the building
-        destroyBuilding(row, col);
+    # destroy the building
+    destroyBuilding(row, col);
 
     return True;
 
 def wait():
     return
 
+def computeHappiness():
+    #global variables
+    global happiness
+    global happiness_percent 
+
+    for i in range(0, 10): # iterate through map
+        for j in range(0, 10):
+            if(population_map[i, j] > 0): # check if building is a housing building
+                flag = True # flag to check if services have been met
+                if(fire_map[i, j] != 1 or police_map[i, j] != 1 or health_map[i, j] != 1): # check if a core service is there
+                    happiness = happiness - 300
+                    flag = False
+                if(school_map[i, j] != 1 or park_map[i, j] != 1 or leisure_map[i, j] != 1): # check if a leisure service is there
+                    happiness = happiness - 15
+                    flag = False
+                if(flag): # if both services are there at a house, increase happiness
+                    happiness = happiness + 75
+    happiness_percent = happiness // 100 # calculate happiness percentage value
+
 def collectTaxes():
+    computeHappiness()
+    tax = population * (happiness / 10000)
+    return tax
     # calculate and add to funds
 
-    print("TODO")
+def takeTurn():
+    #global variables
+    global time
+    global funds
 
-def takeTurn(action):
     # bot chooses between place building, destroy building, and wait
-
     collectTaxes()
     time += 1
 
+    funds = funds + collectTaxes() # update funds
+    print("Happiness: " + str(happiness_percent) + "%") # display happiness
     print(building_map)
-    print("TODO")
+    
+    choice = randint(0, 2) #1 of 3 choices: wait, destroy, or place
+    if (choice == 0): #wait
+        wait()
+    elif (choice == 1): #delete building at (row, col)
+        b = False
+        row = randint(0, map_dimensions[0])
+        col = randint(0, map_dimensions[1])
+        while not b:
+            row = randint(0, map_dimensions[0])
+            col = randint(0, map_dimensions[1])
+            b = destroyBuilding(row, col) #keep randomly generating a coordinate to delete until it is able to be deleted
+    else: #place building of type choice at (row, col)
+        b = False
+        row = randint(0, map_dimensions[0])
+        col = randint(0, map_dimensions[1])
+        choice = randint(1, 10)
+        while not b:
+            row = randint(0, map_dimensions[0])
+            col = randint(0, map_dimensions[1])
+            b = placeBuilding(choice, row, col) #keep randomly generating a coordinate to place a building until possible
