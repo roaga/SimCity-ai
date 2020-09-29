@@ -84,10 +84,8 @@ def checkIfRadiusFree(building_map, centerX, centerY, radius):
     
     return True
 
-def updateRange(building_map, centerX, centerY, radius):
-    # TODO: I'm copy/pasting this basic function a lot, but idk how to make it better
-
-    if (not checkIfOnGrid(centerX, centerY, building_map)):
+def updateRange(mapNum, centerX, centerY, radius, adding):
+    if (not checkIfOnGrid(centerX, centerY, building_map) or building_map[r, c] == 0):
         return False
     
     if (radius > 0):
@@ -96,9 +94,33 @@ def updateRange(building_map, centerX, centerY, radius):
                 if (checkIfOnGrid(centerX, centerY, building_map) and checkIfOnGrid(r, c, building_map) and calculateDistance(r, c, centerX, centerY) <= radius):
                     # Grid coordinate is within radius
                     # print("Distance of " + str(calculateDistance(r, c, centerX, centerY)) + " at (" + str(r) + "," + str(c) + ")")
-                    if (building_map[r, c] != 0):
-                        # TODO: UPDATE BUILDING HERE
-                        print("TODO")
+                    # UPDATE BUILDING HERE
+                    if adding:
+                        if mapNum == 5:
+                            fire_map[r, c] += 1
+                        elif mapNum == 6:
+                            police_map[r, c] += 1
+                        elif mapNum == 7:
+                            health_map[r, c] += 1
+                        elif mapNum == 8:
+                            school_map[r, c] += 1
+                        elif mapNum == 9:
+                            park_map[r, c] += 1
+                        elif mapNum == 10:
+                            leisure_map[r, c] += 1
+                    else: 
+                        if mapNum == 5:
+                            fire_map[r, c] -= 1
+                        elif mapNum == 6:
+                            police_map[r, c] -= 1
+                        elif mapNum == 7:
+                            health_map[r, c] -= 1
+                        elif mapNum == 8:
+                            school_map[r, c] -= 1
+                        elif mapNum == 9:
+                            park_map[r, c] -= 1
+                        elif mapNum == 10:
+                            leisure_map[r, c] -= 1
     else:
         if (building_map[centerX, centerY] != 0):
             return False                    
@@ -207,19 +229,8 @@ def placeBuildingIfPossible(buildingNum, row, col):
 
         # Specific service update
         # if buildingNum == 1 or 2 or 3 or 4:
-            # Do nothing delete this later
-        if buildingNum == 5:
-            updateRange(fire_map, row, col, buildingRange)
-        elif buildingNum == 6:
-            updateRange(police_map, row, col, buildingRange)
-        elif buildingNum == 7:
-            updateRange(health_map, row, col, buildingRange)
-        elif buildingNum == 8:
-            updateRange(school_map, row, col, buildingRange)
-        elif buildingNum == 9:
-            updateRange(park_map, row, col, buildingRange)
-        elif buildingNum == 10:
-            updateRange(leisure_map, row, col, buildingRange)
+        if buildingNum >= 5 and buildingNum <= 10:
+            updateRange(buildingNum, row, col, buildingRange)
         elif buildingNum == 11:
             utilities += 10
 
