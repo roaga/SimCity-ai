@@ -273,6 +273,7 @@ def computeHappiness():
     global wait_turns
 
     wait_flag = False # flag to check if the AI is stalling
+    popTemp = 0 # value to update population at the end of happiness calculation
     for i in range(0, 10): # iterate through map
         for j in range(0, 10):
             if(population_map[i, j] > 0): # check if building is a housing building
@@ -287,6 +288,12 @@ def computeHappiness():
                     flag = False
                 if(flag): # if both services are there at a house, increase happiness
                     happiness = happiness + 150
+
+                 # update happiness for each building
+                temp = population_map[i, j]
+                population_map[i, j] = (5 * (10 ** (building_map[i, j] - 1))) * happiness_percent
+                population = population - (temp - population_map[i, j])
+                
     if (not (wait_flag)): # if there were no houses encountered, run through this section
         wait_turns = wait_turns + 1 # increase stall count
         if (wait_turns > 5): # if stall count is too high, start penalizing
