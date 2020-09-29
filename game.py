@@ -324,4 +324,3 @@ def takeTurn():
 
 for i in range(1000):
     takeTurn()
-            b = placeBuilding(choice, row, col) #keep randomly generating a coordinate to place a building until possible
