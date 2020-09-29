@@ -300,30 +300,28 @@ def takeTurn():
     global funds
 
     # bot chooses between place building, destroy building, and wait
-    collectTaxes()
     time += 1
 
     funds = funds + collectTaxes() # update funds
     print("Happiness: " + str(happiness_percent) + "%") # display happiness
     print(building_map)
-    
-    choice = randint(0, 2) #1 of 3 choices: wait, destroy, or place
-    if (choice == 0): #wait
-        wait()
-    elif (choice == 1): #delete building at (row, col)
-        b = False
-        row = randint(0, map_dimensions[0])
-        col = randint(0, map_dimensions[1])
-        while not b:
-            row = randint(0, map_dimensions[0])
-            col = randint(0, map_dimensions[1])
-            b = destroyBuilding(row, col) #keep randomly generating a coordinate to delete until it is able to be deleted
-    else: #place building of type choice at (row, col)
-        b = False
-        row = randint(0, map_dimensions[0])
-        col = randint(0, map_dimensions[1])
-        choice = randint(1, 10)
-        while not b:
-            row = randint(0, map_dimensions[0])
-            col = randint(0, map_dimensions[1])
+    b = False
+    while not b:
+        choice = randint(0, 2) #1 of 3 choices: wait, destroy, or place
+        if (choice == 0): #wait
+            wait()
+            b = True
+        elif (choice == 1): #delete building at (row, col)
+            row = randint(0, map_dimensions[0]-1)
+            col = randint(0, map_dimensions[1]-1)
+            b = destroyBuildingIfPossible(row, col)
+        else: #place building of type choice at (row, col)
+            choice = randint(1, 10)
+            row = randint(0, map_dimensions[0]-1)
+            col = randint(0, map_dimensions[1]-1)
+            b = placeBuildingIfPossible(choice, row, col) #keep randomly generating a coordinate to place a building until possible
+
+
+for i in range(1000):
+    takeTurn()
             b = placeBuilding(choice, row, col) #keep randomly generating a coordinate to place a building until possible
