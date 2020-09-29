@@ -56,7 +56,7 @@ def calculateDistance(x1, y1, x2, y2):
 
 # Checks if a radius is free of buildings / map edges around an area w/ particular center and radius
 def checkIfOnGrid(x, y, grid):
-    return not (x < 0 or x > len(grid) or y < 0 or y > len(grid[0])) # Assumes non-jagged array with at least one column 
+    return not (x < 0 or x >= len(grid) or y < 0 or y >= len(grid[0])) # Assumes non-jagged array with at least one column 
 
 def checkIfRadiusFree(building_map, centerX, centerY, radius):
     # TODO: Maybe find a better way of iterating over a circular area?
@@ -73,7 +73,7 @@ def checkIfRadiusFree(building_map, centerX, centerY, radius):
     if (radius > 0):
         for r in range(centerX - radius, centerX + radius + 1):
             for c in range(centerY - radius, centerY + radius + 1):
-                if (checkIfOnGrid(centerX, centerY, building_map) and calculateDistance(r, c, centerX, centerY) <= radius):
+                if (checkIfOnGrid(centerX, centerY, building_map) and checkIfOnGrid(r, c, building_map) and calculateDistance(r, c, centerX, centerY) <= radius):
                     # Grid coordinate is within radius
                     # print("Distance of " + str(calculateDistance(r, c, centerX, centerY)) + " at (" + str(r) + "," + str(c) + ")")
                     if (building_map[r, c] != 0):
@@ -93,7 +93,7 @@ def updateRange(building_map, centerX, centerY, radius):
     if (radius > 0):
         for r in range(centerX - radius, centerX + radius + 1):
             for c in range(centerY - radius, centerY + radius + 1):
-                if (checkIfOnGrid(centerX, centerY, building_map) and calculateDistance(r, c, centerX, centerY) <= radius):
+                if (checkIfOnGrid(centerX, centerY, building_map) and checkIfOnGrid(r, c, building_map) and calculateDistance(r, c, centerX, centerY) <= radius):
                     # Grid coordinate is within radius
                     # print("Distance of " + str(calculateDistance(r, c, centerX, centerY)) + " at (" + str(r) + "," + str(c) + ")")
                     if (building_map[r, c] != 0):
@@ -112,7 +112,7 @@ def checkIfNearbyRoads(building_map, centerX, centerY, radius):
     if (radius > 0):
         for r in range(centerX - radius, centerX + radius + 1):
             for c in range(centerY - radius, centerY + radius + 1):
-                if (checkIfOnGrid(centerX, centerY, building_map) and calculateDistance(r, c, centerX, centerY) <= radius):
+                if (checkIfOnGrid(centerX, centerY, building_map) and checkIfOnGrid(r, c, building_map) and calculateDistance(r, c, centerX, centerY) <= radius):
                     # Grid coordinate is within radius
                     if (building_map[r, c] == 1):
                         return True
@@ -126,7 +126,7 @@ def destroyBuilding(row, col):
     global funds
 
     buildingNum = building_map[row][col]
-    buildingCost = buildings[buildingNum - 1]["buildCost"]
+    buildingCost = buildings[int(buildingNum - 1)]["buildCost"]
 
     funds += buildingCost
     building_map[row][col] = 0 # 0 = nothing
