@@ -271,11 +271,17 @@ def computeHappiness():
                     flag = False
                 if(flag): # if both services are there at a house, increase happiness
                     happiness = happiness + 75
+    if (happiness > 10000):
+        happiness = 10000
+    elif (happiness < 0):
+        happiness = 0
+    else:
+        pass
     happiness_percent = happiness // 100 # calculate happiness percentage value
 
 def collectTaxes():
     computeHappiness()
-    tax = population * (happiness / 10000)
+    tax = (int)(population * (happiness / 10000))
     return tax
     # calculate and add to funds
 
