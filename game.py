@@ -56,7 +56,7 @@ def calculateDistance(x1, y1, x2, y2):
 
 # Checks if a radius is free of buildings / map edges around an area w/ particular center and radius
 def checkIfOnGrid(x, y, grid):
-    return not (x < 0 or x >= len(grid) or y < 0 or y >= len(grid[0])) # Assumes non-jagged array with at least one column 
+    return not (x < 0 or x > len(grid) or y < 0 or y > len(grid[0])) # Assumes non-jagged array with at least one column 
 
 def checkIfRadiusFree(building_map, centerX, centerY, radius):
     # TODO: Maybe find a better way of iterating over a circular area?
@@ -73,7 +73,7 @@ def checkIfRadiusFree(building_map, centerX, centerY, radius):
     if (radius > 0):
         for r in range(centerX - radius, centerX + radius + 1):
             for c in range(centerY - radius, centerY + radius + 1):
-                if (checkIfOnGrid(centerX, centerY, building_map) and checkIfOnGrid(r, c, building_map) and calculateDistance(r, c, centerX, centerY) <= radius):
+                if (checkIfOnGrid(centerX, centerY, building_map) and calculateDistance(r, c, centerX, centerY) <= radius):
                     # Grid coordinate is within radius
                     # print("Distance of " + str(calculateDistance(r, c, centerX, centerY)) + " at (" + str(r) + "," + str(c) + ")")
                     if (building_map[r, c] != 0):
@@ -84,43 +84,21 @@ def checkIfRadiusFree(building_map, centerX, centerY, radius):
     
     return True
 
-def updateRange(mapNum, centerX, centerY, radius, adding):
-    if (not checkIfOnGrid(centerX, centerY, building_map) or building_map[r, c] == 0):
+def updateRange(building_map, centerX, centerY, radius):
+    # TODO: I'm copy/pasting this basic function a lot, but idk how to make it better
+
+    if (not checkIfOnGrid(centerX, centerY, building_map)):
         return False
     
     if (radius > 0):
         for r in range(centerX - radius, centerX + radius + 1):
             for c in range(centerY - radius, centerY + radius + 1):
-                if (checkIfOnGrid(centerX, centerY, building_map) and checkIfOnGrid(r, c, building_map) and calculateDistance(r, c, centerX, centerY) <= radius):
+                if (checkIfOnGrid(centerX, centerY, building_map) and calculateDistance(r, c, centerX, centerY) <= radius):
                     # Grid coordinate is within radius
                     # print("Distance of " + str(calculateDistance(r, c, centerX, centerY)) + " at (" + str(r) + "," + str(c) + ")")
-                    # UPDATE BUILDING HERE
-                    if adding:
-                        if mapNum == 5:
-                            fire_map[r, c] += 1
-                        elif mapNum == 6:
-                            police_map[r, c] += 1
-                        elif mapNum == 7:
-                            health_map[r, c] += 1
-                        elif mapNum == 8:
-                            school_map[r, c] += 1
-                        elif mapNum == 9:
-                            park_map[r, c] += 1
-                        elif mapNum == 10:
-                            leisure_map[r, c] += 1
-                    else: 
-                        if mapNum == 5:
-                            fire_map[r, c] -= 1
-                        elif mapNum == 6:
-                            police_map[r, c] -= 1
-                        elif mapNum == 7:
-                            health_map[r, c] -= 1
-                        elif mapNum == 8:
-                            school_map[r, c] -= 1
-                        elif mapNum == 9:
-                            park_map[r, c] -= 1
-                        elif mapNum == 10:
-                            leisure_map[r, c] -= 1
+                    if (building_map[r, c] != 0):
+                        # TODO: UPDATE BUILDING HERE
+                        print("TODO")
     else:
         if (building_map[centerX, centerY] != 0):
             return False                    
@@ -134,7 +112,7 @@ def checkIfNearbyRoads(building_map, centerX, centerY, radius):
     if (radius > 0):
         for r in range(centerX - radius, centerX + radius + 1):
             for c in range(centerY - radius, centerY + radius + 1):
-                if (checkIfOnGrid(centerX, centerY, building_map) and checkIfOnGrid(r, c, building_map) and calculateDistance(r, c, centerX, centerY) <= radius):
+                if (checkIfOnGrid(centerX, centerY, building_map) and calculateDistance(r, c, centerX, centerY) <= radius):
                     # Grid coordinate is within radius
                     if (building_map[r, c] == 1):
                         return True
@@ -148,7 +126,7 @@ def destroyBuilding(row, col):
     global funds
 
     buildingNum = building_map[row][col]
-    buildingCost = buildings[int(buildingNum - 1)]["buildCost"]
+    buildingCost = buildings[buildingNum - 1]["buildCost"]
 
     funds += buildingCost
     building_map[row][col] = 0 # 0 = nothing
@@ -229,8 +207,19 @@ def placeBuildingIfPossible(buildingNum, row, col):
 
         # Specific service update
         # if buildingNum == 1 or 2 or 3 or 4:
-        if buildingNum >= 5 and buildingNum <= 10:
-            updateRange(buildingNum, row, col, buildingRange)
+            # Do nothing delete this later
+        if buildingNum == 5:
+            updateRange(fire_map, row, col, buildingRange)
+        elif buildingNum == 6:
+            updateRange(police_map, row, col, buildingRange)
+        elif buildingNum == 7:
+            updateRange(health_map, row, col, buildingRange)
+        elif buildingNum == 8:
+            updateRange(school_map, row, col, buildingRange)
+        elif buildingNum == 9:
+            updateRange(park_map, row, col, buildingRange)
+        elif buildingNum == 10:
+            updateRange(leisure_map, row, col, buildingRange)
         elif buildingNum == 11:
             utilities += 10
 
@@ -273,6 +262,7 @@ def computeHappiness():
     global wait_turns
 
     wait_flag = False # flag to check if the AI is stalling
+    popTemp = 0 # value to update population at the end of happiness calculation
     for i in range(0, 10): # iterate through map
         for j in range(0, 10):
             if(population_map[i, j] > 0): # check if building is a housing building
@@ -287,6 +277,12 @@ def computeHappiness():
                     flag = False
                 if(flag): # if both services are there at a house, increase happiness
                     happiness = happiness + 150
+
+                 # update happiness for each building
+                temp = population_map[i, j]
+                population_map[i, j] = (5 * (10 ** (building_map[i, j] - 1))) * happiness_percent
+                population = population - (temp - population_map[i, j])
+                
     if (not (wait_flag)): # if there were no houses encountered, run through this section
         wait_turns = wait_turns + 1 # increase stall count
         if (wait_turns > 5): # if stall count is too high, start penalizing
@@ -311,27 +307,30 @@ def takeTurn():
     global funds
 
     # bot chooses between place building, destroy building, and wait
+    collectTaxes()
     time += 1
 
     funds = funds + collectTaxes() # update funds
     print("Happiness: " + str(happiness_percent) + "%") # display happiness
     print(building_map)
-    b = False
-    while not b:
-        choice = randint(0, 2) #1 of 3 choices: wait, destroy, or place
-        if (choice == 0): #wait
-            wait()
-            b = True
-        elif (choice == 1): #delete building at (row, col)
-            row = randint(0, map_dimensions[0]-1)
-            col = randint(0, map_dimensions[1]-1)
-            b = destroyBuildingIfPossible(row, col)
-        else: #place building of type choice at (row, col)
-            choice = randint(1, 10)
-            row = randint(0, map_dimensions[0]-1)
-            col = randint(0, map_dimensions[1]-1)
-            b = placeBuildingIfPossible(choice, row, col) #keep randomly generating a coordinate to place a building until possible
-
-
-for i in range(1000):
-    takeTurn()
+    
+    choice = randint(0, 2) #1 of 3 choices: wait, destroy, or place
+    if (choice == 0): #wait
+        wait()
+    elif (choice == 1): #delete building at (row, col)
+        b = False
+        row = randint(0, map_dimensions[0])
+        col = randint(0, map_dimensions[1])
+        while not b:
+            row = randint(0, map_dimensions[0])
+            col = randint(0, map_dimensions[1])
+            b = destroyBuilding(row, col) #keep randomly generating a coordinate to delete until it is able to be deleted
+    else: #place building of type choice at (row, col)
+        b = False
+        row = randint(0, map_dimensions[0])
+        col = randint(0, map_dimensions[1])
+        choice = randint(1, 10)
+        while not b:
+            row = randint(0, map_dimensions[0])
+            col = randint(0, map_dimensions[1])
+            b = placeBuilding(choice, row, col) #keep randomly generating a coordinate to place a building until possible
