@@ -50,6 +50,76 @@ buildings = [
     {"name": "Utility Plant", "buildCost": 5000, "population": 0, "range": 0}
 ]
 
+class QuickCoord:
+    def __init__(self, val):
+        #self.loc = loc
+        self.val = val
+
+    
+# QUICKMAP is a (possibly?) more space-efficient way of storing grids.
+# Methods: .set() and get()
+# Variables: sizeX, sizeY to specify grid size, name to help with debugging (optional), defaultVal as the array default value
+class QuickMap:
+    # Initializes the QuickMap
+    def __init__(self, sizeX, sizeY, name="<no name given>", defaultVal=-1):
+        self.sizeX = sizeX
+        self.sizeY = sizeY
+        self.coords = {}
+        self.name = name;
+        self.defaultVal = defaultVal;
+
+    # Converts 2D coord to a dictionary-friendly 1D coord (assumes map dimensions are constant)
+    def convertTo1DCoord(self, x, y):
+        if ( not (x >= 0 and x < self.sizeX and y >= 0 and y < self.sizeY) ):
+            print("Error in QuickMap named " + self.name + "! You're trying to access a coordinate at a location outside of the QuickMap!");
+        
+        return x + y * self.sizeY;
+    
+    # Searches for a coord, and returns None if it can't find it
+    def searchCoord(self, x, y):
+        searchForLoc = self.convertTo1DCoord(x, y);
+        return self.coords.get(searchForLoc, None);
+
+    # Adds a coord object
+    def insertCoord(self, x, y, val):
+        insertLoc = self.convertTo1DCoord(x, y);
+        self.coords[insertLoc] = QuickCoord(val);
+
+    # FOR PUBLIC USE: Changes the value of a space or adds a new coord if one does not exist
+    def set(self, x, y, val):
+        # Search for coord to replace
+        coord = self.searchCoord(x, y);
+
+        # Replace val if it exists already
+        if (coord != None):
+            if (val is self.defaultVal):
+                # Remove coord if not needed (default)
+                del self.coords[self.convertTo1DCoord(x, y)];
+            else:
+                coord.val = val;
+        # Add val if it does not exist
+        else:
+            if (val is not self.defaultVal):
+                self.insertCoord(x, y, val);
+            
+    # FOR PUBLIC USE: Gets the value of a specific spot on the grid
+    def get(self, x, y):
+        result = self.searchCoord(x, y);
+        if (result is None):
+            result = QuickCoord(self.defaultVal);
+        
+        return result;
+
+''' 
+QUICKMAP FUNCTIONALITY TESTS
+quickMap = QuickMap(10, 10, "test", 0);
+
+quickMap.set(1, 1, 1)
+quickMap.set(1, 2, -1)
+quickMap.set(1, -20, -1)
+print(quickMap.get(1, 2).val);
+'''
+
 # Typical distance calculation function
 def calculateDistance(x1, y1, x2, y2):
     return math.sqrt(math.pow(x2 - x1, 2) + math.pow(y2 - y1, 2))
