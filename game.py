@@ -382,7 +382,33 @@ def collectTaxes():
     return tax
     # calculate and add to funds
 
-def takeTurn():
+def getIndex():
+    index = 0
+    for i in range(10):
+        for j in range(10):
+            for k in range(8):
+                index += getMap(k)[i][j]
+    return index
+
+def takeAction(action):
+    #action will be between 0 and 1200 inclusive
+    #0 means wait
+    if (action == 0):
+        return takeTurn(-1, -1, False, -1, True)
+    #bewteen 1 and 100 means to destory at pos
+    elif (action <= 100):
+        return takeTurn((action - 1) // 10, (action - 1) % 10, False, -1, False)
+    else:
+        #101 to 200 inclusive should correspond to building number 1
+        if (action % 100 == 0):
+            building_num = (action - 1) // 100 - 1
+        else:
+            building_num = (action) // 100
+        return takeTurn((action - 1) // 10, (action - 1) % 10, True, building_num, False)
+
+
+
+def takeTurn(row, col, place, building_num, wait):
     #global variables
     global time
     global funds
@@ -391,23 +417,19 @@ def takeTurn():
     time += 1
 
     funds = funds + collectTaxes() # update funds
-    print("Happiness: " + str(happiness_percent) + "%") # display happiness
-    print(building_map)
-    b = False
-    while not b:
-        choice = randint(0, 2) #1 of 3 choices: wait, destroy, or place
-        if (choice == 0): #wait
-            wait()
-            b = True
-        elif (choice == 1): #delete building at (row, col)
-            row = randint(0, map_dimensions[0]-1)
-            col = randint(0, map_dimensions[1]-1)
-            b = destroyBuildingIfPossible(row, col)
-        else: #place building of type choice at (row, col)
-            choice = randint(1, 10)
-            row = randint(0, map_dimensions[0]-1)
-            col = randint(0, map_dimensions[1]-1)
-            b = placeBuildingIfPossible(choice, row, col) #keep randomly generating a coordinate to place a building until possible
+    #print("Happiness: " + str(happiness_percent) + "%") # display happiness
+    #print(building_map)
+    if (wait == True):
+        return getIndex(), population
+    elif (place == True):
+        b = placeBuildingIfPossible(row, col, building_num)
+        if (not b):
+            return getIndex(), 0
+    elif (place == False):
+        b = destroyBuildingIfPossible(row, col)
+        if (not b):
+            return getIndex(), 0
+        return getIndex(), population
 
 
 for i in range(1000):
