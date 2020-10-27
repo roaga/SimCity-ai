@@ -23,6 +23,28 @@ school_map = np.zeros(map_dimensions)
 park_map = np.zeros(map_dimensions)
 leisure_map = np.zeros(map_dimensions)
 
+def getMap(x):
+    global building_map
+    global population_map
+    global fire_map
+    global police_map
+    global health_map
+    global school_map
+    global park_map
+    global leisure_map
+
+    switcher = {
+        0 : building_map,
+        1 : population_map,
+        2: fire_map,
+        3: police_map,
+        4: health_map,
+        5: school_map,
+        6: park_map,
+        7: leisure_map
+    }
+    return switcher[x]
+
 class Building(Enum):
     ROAD = 1
     HOUSE = 2
@@ -49,76 +71,6 @@ buildings = [
     {"name": "Leisure", "buildCost": 15000, "population": 0, "range": 5},
     {"name": "Utility Plant", "buildCost": 5000, "population": 0, "range": 0}
 ]
-
-class QuickCoord:
-    def __init__(self, val):
-        #self.loc = loc
-        self.val = val
-
-    
-# QUICKMAP is a (possibly?) more space-efficient way of storing grids.
-# Methods: .set() and get()
-# Variables: sizeX, sizeY to specify grid size, name to help with debugging (optional), defaultVal as the array default value
-class QuickMap:
-    # Initializes the QuickMap
-    def __init__(self, sizeX, sizeY, name="<no name given>", defaultVal=-1):
-        self.sizeX = sizeX
-        self.sizeY = sizeY
-        self.coords = {}
-        self.name = name;
-        self.defaultVal = defaultVal;
-
-    # Converts 2D coord to a dictionary-friendly 1D coord (assumes map dimensions are constant)
-    def convertTo1DCoord(self, x, y):
-        if ( not (x >= 0 and x < self.sizeX and y >= 0 and y < self.sizeY) ):
-            print("Error in QuickMap named " + self.name + "! You're trying to access a coordinate at a location outside of the QuickMap!");
-        
-        return x + y * self.sizeY;
-    
-    # Searches for a coord, and returns None if it can't find it
-    def searchCoord(self, x, y):
-        searchForLoc = self.convertTo1DCoord(x, y);
-        return self.coords.get(searchForLoc, None);
-
-    # Adds a coord object
-    def insertCoord(self, x, y, val):
-        insertLoc = self.convertTo1DCoord(x, y);
-        self.coords[insertLoc] = QuickCoord(val);
-
-    # FOR PUBLIC USE: Changes the value of a space or adds a new coord if one does not exist
-    def set(self, x, y, val):
-        # Search for coord to replace
-        coord = self.searchCoord(x, y);
-
-        # Replace val if it exists already
-        if (coord != None):
-            if (val is self.defaultVal):
-                # Remove coord if not needed (default)
-                del self.coords[self.convertTo1DCoord(x, y)];
-            else:
-                coord.val = val;
-        # Add val if it does not exist
-        else:
-            if (val is not self.defaultVal):
-                self.insertCoord(x, y, val);
-            
-    # FOR PUBLIC USE: Gets the value of a specific spot on the grid
-    def get(self, x, y):
-        result = self.searchCoord(x, y);
-        if (result is None):
-            result = QuickCoord(self.defaultVal);
-        
-        return result;
-
-''' 
-QUICKMAP FUNCTIONALITY TESTS
-quickMap = QuickMap(10, 10, "test", 0);
-
-quickMap.set(1, 1, 1)
-quickMap.set(1, 2, -1)
-quickMap.set(1, -20, -1)
-print(quickMap.get(1, 2).val);
-'''
 
 # Typical distance calculation function
 def calculateDistance(x1, y1, x2, y2):
@@ -154,8 +106,10 @@ def checkIfRadiusFree(building_map, centerX, centerY, radius):
     
     return True
 
-def updateRange(mapNum, centerX, centerY, radius, adding):
-    if (not checkIfOnGrid(centerX, centerY, building_map) or building_map[r, c] == 0):
+def updateRange(building_map, centerX, centerY, radius):
+    # TODO: I'm copy/pasting this basic function a lot, but idk how to make it better
+
+    if (not checkIfOnGrid(centerX, centerY, building_map)):
         return False
     
     if (radius > 0):
@@ -164,33 +118,9 @@ def updateRange(mapNum, centerX, centerY, radius, adding):
                 if (checkIfOnGrid(centerX, centerY, building_map) and checkIfOnGrid(r, c, building_map) and calculateDistance(r, c, centerX, centerY) <= radius):
                     # Grid coordinate is within radius
                     # print("Distance of " + str(calculateDistance(r, c, centerX, centerY)) + " at (" + str(r) + "," + str(c) + ")")
-                    # UPDATE BUILDING HERE
-                    if adding:
-                        if mapNum == 5:
-                            fire_map[r, c] += 1
-                        elif mapNum == 6:
-                            police_map[r, c] += 1
-                        elif mapNum == 7:
-                            health_map[r, c] += 1
-                        elif mapNum == 8:
-                            school_map[r, c] += 1
-                        elif mapNum == 9:
-                            park_map[r, c] += 1
-                        elif mapNum == 10:
-                            leisure_map[r, c] += 1
-                    else: 
-                        if mapNum == 5:
-                            fire_map[r, c] -= 1
-                        elif mapNum == 6:
-                            police_map[r, c] -= 1
-                        elif mapNum == 7:
-                            health_map[r, c] -= 1
-                        elif mapNum == 8:
-                            school_map[r, c] -= 1
-                        elif mapNum == 9:
-                            park_map[r, c] -= 1
-                        elif mapNum == 10:
-                            leisure_map[r, c] -= 1
+                    if (building_map[r, c] != 0):
+                        # TODO: UPDATE BUILDING HERE
+                        print("TODO")
     else:
         if (building_map[centerX, centerY] != 0):
             return False                    
@@ -299,8 +229,19 @@ def placeBuildingIfPossible(buildingNum, row, col):
 
         # Specific service update
         # if buildingNum == 1 or 2 or 3 or 4:
-        if buildingNum >= 5 and buildingNum <= 10:
-            updateRange(buildingNum, row, col, buildingRange)
+            # Do nothing delete this later
+        if buildingNum == 5:
+            updateRange(fire_map, row, col, buildingRange)
+        elif buildingNum == 6:
+            updateRange(police_map, row, col, buildingRange)
+        elif buildingNum == 7:
+            updateRange(health_map, row, col, buildingRange)
+        elif buildingNum == 8:
+            updateRange(school_map, row, col, buildingRange)
+        elif buildingNum == 9:
+            updateRange(park_map, row, col, buildingRange)
+        elif buildingNum == 10:
+            updateRange(leisure_map, row, col, buildingRange)
         elif buildingNum == 11:
             utilities += 10
 
@@ -343,7 +284,6 @@ def computeHappiness():
     global wait_turns
 
     wait_flag = False # flag to check if the AI is stalling
-    popTemp = 0 # value to update population at the end of happiness calculation
     for i in range(0, 10): # iterate through map
         for j in range(0, 10):
             if(population_map[i, j] > 0): # check if building is a housing building
@@ -358,12 +298,6 @@ def computeHappiness():
                     flag = False
                 if(flag): # if both services are there at a house, increase happiness
                     happiness = happiness + 150
-
-                 # update happiness for each building
-                temp = population_map[i, j]
-                population_map[i, j] = (5 * (10 ** (building_map[i, j] - 1))) * happiness_percent
-                population = population - (temp - population_map[i, j])
-                
     if (not (wait_flag)): # if there were no houses encountered, run through this section
         wait_turns = wait_turns + 1 # increase stall count
         if (wait_turns > 5): # if stall count is too high, start penalizing
@@ -381,6 +315,45 @@ def collectTaxes():
     tax = (int)(population * (happiness / 10000))
     return tax
     # calculate and add to funds
+
+def reset():
+    global time
+    global funds
+    global happiness
+    global happiness_percent
+    global population
+    global utilities
+    global wait_turns
+    global roadRadiusToCheck
+    global map_dimensions
+    global building_map
+    global population_map
+    global police_map
+    global fire_map
+    global health_map
+    global school_map
+    global park_map
+    global leisure_map
+
+    time = 0 # game time
+    funds = 1000 + 20000 # player's cash + set larger for testing
+    happiness = 10000 # happiness of city, in units
+    happiness_percent = happiness // 100 # happiness of city, as a percent, reported to model
+    population = 0 # population of city
+    utilities = 0 # total water/energy provided for the city
+    wait_turns = 0 # turns without doing anything
+
+    roadRadiusToCheck = 1
+
+    map_dimensions = (10, 10) # should be 256x256 for proper game
+    building_map = np.zeros(map_dimensions)
+    population_map = np.zeros(map_dimensions)
+    fire_map = np.zeros(map_dimensions)
+    police_map = np.zeros(map_dimensions)
+    health_map = np.zeros(map_dimensions)
+    school_map = np.zeros(map_dimensions)
+    park_map = np.zeros(map_dimensions)
+    leisure_map = np.zeros(map_dimensions)
 
 def getIndex():
     index = 0
@@ -401,12 +374,16 @@ def takeAction(action):
     else:
         #101 to 200 inclusive should correspond to building number 1
         if (action % 100 == 0):
-            building_num = (action - 1) // 100 - 1
+            building_num = (action - 1) // 100
         else:
             building_num = (action) // 100
-        return takeTurn((action - 1) // 10, (action - 1) % 10, True, building_num, False)
+        return takeTurn((action - 1) // 100, (action - 1) % 10, True, building_num, False)
 
-
+def getState():
+    answer = []
+    for i in range(8):
+        answer.append(getMap(i))
+    return np.asarray(answer)
 
 def takeTurn(row, col, place, building_num, wait):
     #global variables
@@ -422,15 +399,12 @@ def takeTurn(row, col, place, building_num, wait):
     if (wait == True):
         return getIndex(), population
     elif (place == True):
-        b = placeBuildingIfPossible(row, col, building_num)
+        b = placeBuildingIfPossible(building_num, row, col)
         if (not b):
-            return getIndex(), 0
+            return getIndex(), -1
+        return getIndex(), population
     elif (place == False):
         b = destroyBuildingIfPossible(row, col)
         if (not b):
-            return getIndex(), 0
+            return getIndex(), -1
         return getIndex(), population
-
-
-for i in range(1000):
-    takeTurn()
