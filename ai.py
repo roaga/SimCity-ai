@@ -42,3 +42,4 @@ class ResBlock(nn.Module):
         out = self.bn2(self.conv2(out))
         out += residual
         out = F.relu(out)
+        return out
