@@ -11,7 +11,7 @@ from torch import nn
 class NeuralNet(nn.Module):
     def __init__(self):
         super(NeuralNet, self).__init__()
-        self.conv = nn.Conv2d(128, 128, 1, 1)
+        #self.conv = nn.Conv2d(128, 128, 1, 1) - maybe add this to the final 2 layers to improve efficiency
     
 
     def forward(self, x):
