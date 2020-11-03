@@ -10,14 +10,14 @@ import torch.nn.functional as F
 class NeuralNet(nn.Module):
     def __init__(self):
         super(NeuralNet, self).__init__()
+        self.res = ResBlock()
 
     def forward(self, x):
         x = x.astype(np.float32)
         x = torch.from_numpy(x)
-        x = x.unsqueeze(0).unsqueeze(0)
-        res = ResBlock()
+        x = x.unsqueeze(0)
         for i in range(19):
-            x = res.forward(x)
+            x = self.res.forward(x)
         x = torch.flatten(x) 
         move = nn.Linear(800, 12*10*10+1)(x)
         move = torch.sigmoid(move) #move to be taken
@@ -27,14 +27,14 @@ class NeuralNet(nn.Module):
 
 
 class ResBlock(nn.Module):
-    def __init__(self, inplanes=1, planes=1, stride=1, downsample=None):
+    def __init__(self, inplanes=8, planes=8, stride=1, downsample=None):
         super(ResBlock, self).__init__()
-        self.conv1 = nn.Conv3d(inplanes, planes, kernel_size=3, stride=stride,
+        self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=3, stride=stride,
                      padding=1, bias=False)
-        self.bn1 = nn.BatchNorm3d(planes)
-        self.conv2 = nn.Conv3d(planes, planes, kernel_size=3, stride=stride,
+        self.bn1 = nn.BatchNorm2d(planes)
+        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride,
                      padding=1, bias=False)
-        self.bn2 = nn.BatchNorm3d(planes)
+        self.bn2 = nn.BatchNorm2d(planes)
 
     def forward(self, x):
         residual = x
@@ -47,4 +47,4 @@ class ResBlock(nn.Module):
 
 game.reset()
 model = NeuralNet()
-print(model.forward(game.getState())[0].size())
+print(model.forward(game.getState()))
