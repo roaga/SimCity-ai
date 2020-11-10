@@ -3,6 +3,7 @@ import numpy as np
 import torch
 from torch import nn
 import torch.nn.functional as F
+import torch.optim as optim
 #state will be 10 x 10 x 8 array - 10 x 10 for board dimensions and 8 boards. We might need to add to this last dimension later
 #action space: all possible actions on a given turn
 #reward: happiness - population dependent
@@ -45,6 +46,8 @@ class ResBlock(nn.Module):
         return out
 
 
-game.reset()
-model = NeuralNet()
-print(model.forward(game.getState()))
+def loss(moves, vals, wins, pi):
+    #moves will be vector of moves over all training examples
+    #vals will be state vals over all training examples
+    #wins will be whether the game was won on from that state: -1 or 1
+    return np.sum((vals - wins) ** 2 - np.matmul(pi, np.transpose(np.log(moves))), axis=1)
