@@ -111,8 +111,8 @@ class Node:
         for i in range(len(self.children)):
             if (self.children[i].times_checked > 0 and self.children[i].value / self.children[i].times_checked > bestMoveValue):
                 bestMove = i
-                bestMoveValue = self.children[i].value
-        
+                bestMoveValue = self.children[i].value / self.children[i].times_checked
+        print(self.children[bestMove].times_checked)
         # Move!
         if bestMove != -1:
             simulateAction(self.children[bestMove].action)
@@ -145,7 +145,7 @@ class Node:
             # SIMULATE A GAME
             else:
                 #print("Simulating game...")
-                self.value = simulateGame(15)
+                self.value = simulateGame(1)
                 self.times_checked += 1
                 #print("Value of simulated node: " + str(self.value))
                 return self.value
@@ -664,7 +664,7 @@ def simulateGame(num_turns):
 
     # Return the results
     #print("Simulation funds: " + str(-simulationFunds/100)) 
-    return -simulationFunds/100
+    return simulationFunds/10
 
 def simulateAction(action):
     # Global vars
@@ -748,10 +748,10 @@ def takeTurn(row, col, place, building_num, wait):
 while True:
     # Monte Carlo Tree Search test
     parentNode = Node(None, 0, -1)
-    for i in range(15000):
+    for i in range(3000):
         parentNode.exploreBranch(0)
         if (i % 55 == 0):
-            print("Training: " + str(i) + "/15000")
+            print("Training: " + str(i) + "/3000")
     parentNode.pickBestMove()
     #print("Num children: " + str(parentNode.getNumChildren()))
     print(building_map) 
