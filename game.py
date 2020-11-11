@@ -145,7 +145,7 @@ class Node:
             # SIMULATE A GAME
             else:
                 #print("Simulating game...")
-                self.value = simulateGame(1)
+                self.value = simulateGame(3)
                 self.times_checked += 1
                 #print("Value of simulated node: " + str(self.value))
                 return self.value
