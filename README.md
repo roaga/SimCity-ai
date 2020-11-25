@@ -2,29 +2,29 @@
 An ML project to play a command line version of SimCity.
 
 # Building Types
-1 = ROAD, costs $0
-2 = HOUSE, costs $1000
-3 = TOWER, costs $10,000
-4 = SKYSCRAPER, costs $20,000
-5 = FIRE_STATION, costs $15,000
-6 = POLICE_STATION, costs $15,000
-7 = HOSPIITAL, costs $15,000
-8 = SCHOOL, costs $15,000
-9 = PARK, costs $15,000
-10 = LEISURE, costs $15,000
-11 = UTILITY_PLANT, costs $5,000
+  - 1 = ROAD, costs $0
+  - 2 = HOUSE, costs $1000
+  - 3 = TOWER, costs $10,000
+  - 4 = SKYSCRAPER, costs $20,000
+  - 5 = FIRE_STATION, costs $15,000
+  - 6 = POLICE_STATION, costs $15,000
+  - 7 = HOSPIITAL, costs $15,000
+  - 8 = SCHOOL, costs $15,000
+  - 9 = PARK, costs $15,000
+  - 10 = LEISURE, costs $15,000
+  - 11 = UTILITY_PLANT, costs $5,000
 
 # Introduction
-placeBuilding(buildingNum, row, col) => Places a building of a specified type down, replacing whatever was in the space before. Funds changed based on price.
-placeBuildingIfPossible(buildingNum, row, col) => Checks to make sure it is possible to place a building down in the specified spot, then calls placeBuilding().
-destroyBuilding(row, col) => Replaces an index on grid with a blank one, refunds the price of the building
-destroyBuildingIfPossible(row, col) => If possible to destroy a building, calls destroyBuilding()
-checkIfNearbyRoads(building_map, centerX, centerY, radius) => Check if there are nearby roads in a certain radius
-updateRange(building_map, centerX, centerY, radius) => Update all buildings with a range (on respective grids)
-checkIfOnGrid(x, y, grid) => Check if point is on grid
-calculateDistance(x1, y1, x2, y2) => Calculate the distance between two points
+  - placeBuilding(buildingNum, row, col) => Places a building of a specified type down, replacing whatever was in the space before. Funds changed based on price.
+  - placeBuildingIfPossible(buildingNum, row, col) => Checks to make sure it is possible to place a building down in the specified spot, then calls placeBuilding().
+  - destroyBuilding(row, col) => Replaces an index on grid with a blank one, refunds the price of the building
+  - destroyBuildingIfPossible(row, col) => If possible to destroy a building, calls destroyBuilding()
+  - checkIfNearbyRoads(building_map, centerX, centerY, radius) => Check if there are nearby roads in a certain radius
+  - updateRange(building_map, centerX, centerY, radius) => Update all buildings with a range (on respective grids)
+  - checkIfOnGrid(x, y, grid) => Check if point is on grid
+  - calculateDistance(x1, y1, x2, y2) => Calculate the distance between two points
 
-computeHappiness() => Currently unused
+  - computeHappiness() => Currently unused
 
 
 # QuickMap
