@@ -26,6 +26,17 @@ calculateDistance(x1, y1, x2, y2) => Calculate the distance between two points
 
 computeHappiness() => Currently unused
 
+
+# QuickMap
+  - Never used, but is a potentially more memory-efficient way to access large grids
+  - Instead of storing empty grid locations, it keeps a dynamic dictionary/"HashMap" of spots that were filled and what they were filled with
+The tree is made up of node objects with children. 
+
+# Reinforcement Learning
+Reinforcement Learning is a form of artificial intelligence commonly used to play games. In the process, there is an agent, or the actual AI, and environment, the game itself where the agent is attempting to maximize some reward value given by the environment. During each state of the environment, the agent selects from a set of available actions, which then transitions the environment to the next state and modifies the reward value. The agent's goal is to maximize the reward value at the conclusion of the game by selecting the optimal actions for each state. Traditionally, this has been done using Q learning, where the agent keeps a table of values that map each state to the highest possible reward values for that state. However, for more complex games such as chess and sim city, there are too many states to keep track of with modern computer limitations. 
+
+AlphaZero is a chess program which solves this problem by using a combination of the Monte Carlo Tree Search and a deep neural network. We have implemented this process to train an AI to play our version of SimCity, which can be found in the file game.py.
+
 # Monte Carlo Tree Search (MCTS)
 The Node class:
   - getNumChildren() => number of children nodes associated with the node
@@ -45,7 +56,8 @@ Other functions:
   - decomposeAction(action) => Transform a numeric action into something more readable
   
 
-# QuickMap
-  - Never used, but is a potentially more memory-efficient way to access large grids
-  - Instead of storing empty grid locations, it keeps a dynamic dictionary/"HashMap" of spots that were filled and what they were filled with
-The tree is made up of node objects with children. 
+# Neural Network
+The neural network takes as input the state of the board, which in our case is an array of dimensions 10 x 10 x 8. It outputs two values, the value for the state of the board, and the selected move to be taken at that state. The value is between -1 and 1, where 1 represents a winning state and -1 represents a losing state. The move output is an array of size 1201 for the 1201 possible moves available: 1100 moves for placing 1 of 11 types of buildings at each slot in the 10x10 grid, 100 moves for destroying a building at a spot in the grid, and one move for doign nothing that turn. Each value in the 1201 output array is between 0 and 1, and the selected move will be the index with the highest value. The neural network is involves 1 initial convolutional layer, 19 residual layers, and then finally linear layers at the end.
+
+# Training
+During training, the Monte Carlo Tree Search will attempt to determine the most optimtal move and corresponding value for that state. The neural network will also calulate values and moves for the state, which will then be compared to the selected values from the MCTS in the loss function. For now, we have decided to use L2 loss (squared error). As such, the idea is that the neural network will learn to approximate values and moves which the MCTS would take for a given state, since it would be too slow to compute the values with the MCTS for every state.
